@@ -1,0 +1,23 @@
+---
+name: kibana
+version: 8.6.2
+
+labels: {}
+
+annotations: {}
+
+spec:
+  count: 1
+  elasticsearchRef:
+    name: eck-elasticsearch
+  podTemplate:
+    spec:
+      containers:
+      - name: kibana
+        resources:
+          requests:
+            memory: 1Gi
+            cpu: 0.5
+          limits:
+            memory: 2Gi
+            cpu: 1

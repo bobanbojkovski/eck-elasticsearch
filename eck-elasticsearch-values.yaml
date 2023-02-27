@@ -1,0 +1,59 @@
+---
+version: 8.6.2
+
+annotations:
+  eck.k8s.elastic.co/license: basic
+  
+nodeSets:
+- name: masters
+  count: 1
+  config:
+    node.roles: ["master"]
+    node.store.allow_mmap: false
+  podTemplate:
+    spec:
+      containers:
+      - name: elasticsearch
+        resources:
+          limits:
+            memory: 4Gi
+          requests:
+            memory: 2Gi
+  volumeClaimTemplates:
+  - metadata:
+      name: elasticsearch-master
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: gp3
+      resources:
+        requests:
+          storage: 1Gi
+
+
+- name: data
+  count: 2
+  config:
+    node.roles: ["data", "ingest", "transform"]
+    node.store.allow_mmap: false
+  podTemplate:
+    spec:
+      containers:
+      - name: elasticsearch
+        resources:
+          limits:
+            memory: 4Gi
+            cpu: 1
+          requests:
+            memory: 2Gi
+            cpu: 200m
+  volumeClaimTemplates:
+  - metadata:
+      name: elasticsearch-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: gp3
+      resources:
+        requests:
+          storage: 10Gi
