@@ -17,9 +17,29 @@ spec:
         config:
         - paths: ["/var/log/containers/*${data.kubernetes.container.id}.log"]
           type: container
+          
+    logging:
+      level: warning
+
     processors:
-    - add_cloud_metadata: {}
-    - add_host_metadata: {}
+    #- add_cloud_metadata: {}
+    #- add_host_metadata: {}
+    
+    - drop_fields:
+        fields: ["agent.ephemeral_id", "agent.id", "agent.name", "container.runtime", "ecs.version", "host.name", "input.type", "kubernetes.namespace_labels.kubernetes_io/metadata_name", "kubernetes.namespace_uid", "kubernetes.node.hostname", "kubernetes.node.labels.aws-operator_giantswarm_io/version", "kubernetes.node.labels.beta_kubernetes_io/arch", "kubernetes.node.labels.beta_kubernetes_io/instance-type", "kubernetes.node.labels.beta_kubernetes_io/os", "kubernetes.node.labels.failure-domain_beta_kubernetes_io/region", "kubernetes.node.labels.failure-domain_beta_kubernetes_io/zone", "kubernetes.node.labels.giantswarm_io/machine-deployment", "kubernetes.node.labels.giantswarm_io/provider", "kubernetes.node.labels.ip", "kubernetes.node.labels.kubernetes_io/arch", "kubernetes.node.labels.kubernetes_io/hostname", "kubernetes.node.labels.kubernetes_io/os", "kubernetes.node.labels.kubernetes_io/role", "kubernetes.node.labels.node_kubernetes_io/instance-type", "kubernetes.node.labels.node_kubernetes_io/worker", "kubernetes.node.labels.node-role_kubernetes_io/worker", "kubernetes.node.labels.role", "kubernetes.node.labels.topology_ebs_csi_aws_com/zone", "kubernetes.node.labels.topology_kubernetes_io/region", "kubernetes.node.labels.topology_kubernetes_io/zone", "kubernetes.node.labels.vpc_amazonaws_com/eniConfig", "kubernetes.node.name", "kubernetes.node.uid"]
+        
+    output.elasticsearch:
+      hosts: ["https://eck-elasticsearch-es-http:9200"]
+      ssl.verification_mode: none
+      indices:
+        - index: "%{[agent.type]}-debug-%{[agent.version]}"
+          when:
+            or:
+              - equals:
+                  level: "TRACE"
+              - equals:
+                  level: "DEBUG"
+
 
   daemonSet:
     podTemplate:
